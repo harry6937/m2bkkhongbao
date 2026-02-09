@@ -17,7 +17,10 @@ body{
   margin:auto;
   padding:20px;
 }
-.header{text-align:center;margin-bottom:15px}
+.header{
+  text-align:center;
+  margin-bottom:15px;
+}
 .card{
   background:#fff;
   color:#b80000;
@@ -30,6 +33,7 @@ input{
   margin:8px 0;
   border-radius:12px;
   border:1px solid #ddd;
+  font-size:16px;
 }
 button{
   width:100%;
@@ -42,7 +46,8 @@ button{
 }
 .envelope{
   margin:20px auto;
-  width:120px;height:80px;
+  width:120px;
+  height:80px;
   background:#d32f2f;
   border-radius:10px;
   animation:shake 1.5s infinite;
@@ -53,7 +58,8 @@ button{
   75%{transform:rotate(-2deg)}
 }
 #popup{
-  position:fixed;inset:0;
+  position:fixed;
+  inset:0;
   background:rgba(0,0,0,.6);
   display:none;
   align-items:center;
@@ -71,12 +77,24 @@ button{
   from{transform:scale(.6);opacity:0}
   to{transform:scale(1);opacity:1}
 }
-.amount{font-size:48px;font-weight:800}
-.small{font-size:13px;color:#333}
+.amount{
+  font-size:48px;
+  font-weight:800;
+}
+.small{
+  font-size:13px;
+  color:#333;
+}
+.line-btn{
+  margin-top:10px;
+  background:#06c755;
+  color:#fff;
+}
 </style>
 </head>
 
 <body>
+
 <div class="container">
   <div class="header">
     <h2>🧧 M2 Mobile</h2>
@@ -91,15 +109,18 @@ button{
   </div>
 </div>
 
+<!-- 弹窗 -->
 <div id="popup">
-  <div class="popup-box">
+  <div class="popup-box" id="popupBox">
     <p>🎉 သင်ရရှိသည်</p>
     <div class="amount" id="amount"></div>
     <p class="small">Screenshot ပြပြီး Shop တွင် အသုံးပြုနိုင်ပါသည်</p>
+    <button class="line-btn" onclick="goLine()">➕ LINE ကို Friend ထည့်ပြီး ထပ်ဆွဲမည်</button>
     <button onclick="closePopup()">OK</button>
   </div>
 </div>
 
+<!-- Google Sheet 提交（稳定版） -->
 <form id="submitForm"
   action="https://script.google.com/macros/s/AKfycbyLMDJHe6A7UHfHSpfmj48lDtj9EzoX_MrCMkKhkrlpzOqC9qeO75yq1_wRpq8jkOMxjg/exec"
   method="POST"
@@ -113,36 +134,69 @@ button{
 <iframe name="hidden_iframe" style="display:none"></iframe>
 
 <script>
+const LINE_URL = "https://line.me/R/ti/p/@197ykdjy";
+
 function draw(){
-  let name=document.getElementById("name").value.trim();
-  let phone=document.getElementById("phone").value.trim();
-  if(!name||!phone){alert("အချက်အလက်ဖြည့်ပါ");return;}
+  let name = document.getElementById("name").value.trim();
+  let phone = document.getElementById("phone").value.trim();
 
-  let count=Number(localStorage.getItem("drawCount")||0);
-  if(count>=2){alert("❌ မရတော့ပါ");return;}
+  if(!name || !phone){
+    alert("အချက်အလက် ဖြည့်ပါ");
+    return;
+  }
 
-  const pool=[200,400,500,800,1000];
-  const weights=[40,30,15,10,5];
-  let r=Math.random()*100,s=0,res=200;
-  for(let i=0;i<pool.length;i++){s+=weights[i];if(r<s){res=pool[i];break;}}
+  let count = Number(localStorage.getItem("drawCount") || 0);
 
-  document.getElementById("amount").innerText=res+"฿";
-  document.getElementById("popup").style.display="flex";
+  if(count >= 2){
+    alert("❌ ထပ်မဆွဲနိုင်တော့ပါ");
+    return;
+  }
+
+  if(count === 1 && !localStorage.getItem("lineJoined")){
+    alert("➕ LINE ကို Friend အရင်ထည့်ပါ");
+    return;
+  }
+
+  const pool = [200, 400, 500, 800, 1000];
+  const weights = [40, 30, 15, 10, 5];
+
+  let r = Math.random() * 100;
+  let s = 0;
+  let res = 200;
+
+  for(let i = 0; i < pool.length; i++){
+    s += weights[i];
+    if(r < s){
+      res = pool[i];
+      break;
+    }
+  }
+
+  document.getElementById("amount").innerText = res + "฿";
+  document.getElementById("popup").style.display = "flex";
 
   count++;
-  localStorage.setItem("drawCount",count);
+  localStorage.setItem("drawCount", count);
 
-  let f=document.getElementById("submitForm");
-  f.name.value=name;
-  f.phone.value=phone;
-  f.amount.value=res;
-  f.drawCount.value=count;
-  f.deviceId.value=navigator.userAgent;
+  let f = document.getElementById("submitForm");
+  f.name.value = name;
+  f.phone.value = phone;
+  f.amount.value = res;
+  f.drawCount.value = count;
+  f.deviceId.value = navigator.userAgent;
   f.submit();
 }
+
+function goLine(){
+  localStorage.setItem("lineJoined", "yes");
+  window.open(LINE_URL, "_blank");
+  document.getElementById("popup").style.display = "none";
+}
+
 function closePopup(){
-  document.getElementById("popup").style.display="none";
+  document.getElementById("popup").style.display = "none";
 }
 </script>
+
 </body>
 </html>
